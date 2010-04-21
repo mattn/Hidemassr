@@ -1,0 +1,222 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML lang="ja">
+
+<HEAD>
+	<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+	<META http-equiv="Content-Style-Type" content="text/css">
+	<LINK rel="stylesheet" type="text/css" href="http://mobitan.org/wisteria-std.css">
+	<TITLE>Wisteria - 秀丸マクロ - Hidematter</TITLE>
+</HEAD>
+<BODY>
+
+<UL class="headnavi">
+	<LI><A href="http://mobitan.org/">Wisteria</A> &gt;
+	<LI><A href="http://mobitan.org/hm/">秀丸マクロ</A> &gt;
+</UL>
+
+<H2 class="pagetop">Hidematter</H2>
+
+<DIV class="abst"><P>秀丸エディタから Twitter へ投稿</P></DIV>
+
+<DIV class="date" align="right"><!--{hidematter|Version {verstr}　{date}-->Version 0.2　2010/04/19<!--}--></DIV>
+
+<DIV class="layout"><TABLE width="98%"><TR><TD class="subindex" valign="top">
+	<H4 class="top">目次</H4>
+	<UL>
+		<LI><A href="#download">ダウンロード</A>
+		<LI><A href="#outline">概要</A>
+		<LI><A href="#setup">セットアップ</A>
+		<LI><A href="#usage">使い方と動作</A>
+		<LI><A href="#statements">お約束</A>
+		<LI><A href="#todo">既知の問題</A>
+		<LI><A href="#history">バージョン履歴</A>
+		<LI><A href="#feedback">フィードバック</A>
+	</UL>
+</TD><TD class="body">
+	<DIV class="img"><IMG src="hidematter01.png" width="521" height="432" alt="スクリーンショット"></DIV>
+</TD></TR></TABLE></DIV>
+
+<!--{foottext--><!--}-->
+
+
+<H3><A name="download" id="download">ダウンロード</A></H3>
+
+<UL class="files">
+	<LI class="lzh"><!--{hidematter|<A href="http://mobitan.org/hm/hidematter/{arcname}">{arcname}</A>　Version {verstr}　({date})--><A href="http://mobitan.org/hm/hidematter/hidematter02.lzh">hidematter02.lzh</A>　Version 0.2　(2010/04/19)<!--}-->
+</UL>
+
+<!--{foottext--><!--}-->
+
+
+<H3><A name="outline" id="outline">概要</A></H3>
+
+<UL class="sect">
+	<LI>秀丸エディタから Twitter へ投稿します。
+	<LI>長い文章を 1 行ずつ or 140 字ごとに自動分割して連続投稿できます。
+	<LI>j.mp による URL 短縮機能が統合されています。
+	<LI>今のところ書き込み専用です。表示機能はありません。
+</UL>
+
+<!--{foottext--><!--}-->
+
+
+<H3><A name="setup" id="setup">セットアップ</A></H3>
+
+<H4><A name="setup:install" id="setup:install">インストール</A></H4>
+<OL class="sect">
+	<LI><A href="http://hide.maruo.co.jp/software/hidemaru.html">秀丸エディタ</A> ver 8.00 以降<!--{footnote|秀丸エディタ v7.x 以前では Hidematter は使えません。--><SUP class="footmark"><A href="#foottext:4.1" name="footmark:4.1" id="footmark:4.1" title="秀丸エディタ v7.x 以前では Hidematter は使えません。">*1</A></SUP><!--}-->と Windows 98 以降<!--{footnote|厳密には IE4 以降…で動くと思うけど、動作不確認。現実的には IE6 以降を推奨。--><SUP class="footmark"><A href="#foottext:4.2" name="footmark:4.2" id="footmark:4.2" title="厳密には IE4 以降…で動くと思うけど、動作不確認。現実的には IE6 以降を推奨。">*2</A></SUP><!--}-->をお使いですね？
+	<LI>マクロフォルダの位置を確認します。マクロフォルダは秀丸の [その他]-[動作環境]-[パス]-[環境]-[マクロファイル用のフォルダ] で指定されているフォルダです。無指定なら Hidemaru.exe と同じフォルダです。
+	<LI>ダウンロードしたアーカイブをマクロフォルダに解凍します。
+	<LI>[マクロ]-[マクロ登録...] で Hidematter.mac を適当な番号に登録します。
+	<LI>[その他]-[キー割り当て...] で適当なキーに割り当てます。
+</OL>
+<P>インストール後のファイル構成は次のようになります。INI ファイルは初回起動時に自動生成されます。</P>
+<PRE>
+■<VAR>マクロフォルダ</VAR>\
+│・Hidematter.mac
+└■Hidematter\
+　　・hidematr.mac
+　　・wshTweet.js
+　　・shortenUrls.js
+　　・user=<VAR>Windowsユーザ名</VAR>.ini
+</PRE>
+
+<H4><A name="setup:update" id="setup:update">アップデート</A></H4>
+<OL class="sect">
+	<LI>新しいアーカイブをマクロフォルダに上書き解凍します。
+</OL>
+
+<H4><A name="setup:uninstall" id="setup:uninstall">アンインストール</A></H4>
+<OL class="sect">
+	<LI>インストール時と同じ方法でキー割り当てを解除します。
+	<LI>同様にマクロ登録も解除します。
+	<LI>Hidematter.mac と Hidematter フォルダを削除します。レジストリは使っていません。
+</OL>
+
+<!--{foottext-->
+<DIV class="footnote"><HR><DL>
+	<DT><A href="#footmark:4.1" name="foottext:4.1" id="foottext:4.1">*1</A></DT>
+	<DD>秀丸エディタ v7.x 以前では Hidematter は使えません。</DD>
+	<DT><A href="#footmark:4.2" name="foottext:4.2" id="foottext:4.2">*2</A></DT>
+	<DD>厳密には IE4 以降…で動くと思うけど、動作不確認。現実的には IE6 以降を推奨。</DD>
+</DL></DIV>
+<!--}-->
+
+
+<H3><A name="usage" id="usage">使い方と動作</A></H3>
+
+<OL class="sect">
+	<LI>投稿したい文章を範囲選択します。無選択時はカーソルのある行全体が投稿されます。
+	<LI>Hidematter.mac を実行します。
+	<LI>初回起動時は Twitter のユーザー名とパスワードを入力します。
+	<LI>投稿が行われます。
+	<UL class="p">
+		<LI>成功した場合、投稿された文章に下線が引かれます。
+		<LI>認証に失敗した場合、メッセージが表示され、記憶されていたユーザー名とパスワードがリセットされます。
+		<LI>その他の原因で失敗した場合、理由を示すメッセージが表示されます。
+	</UL>
+</OL>
+<UL class="sect">
+	<LI>複数行選択した場合、1 行ずつ別々に投稿するか、改行も含めてそのまま投稿するかを選べます。
+	<LI>投稿範囲が 140 字を超える場合、自動的に分割されて連続投稿されます。
+</UL>
+
+<h4>ユーザー名とパスワードについて</h4>
+
+<UL class="sect">
+	<li>ユーザー名はファイルに保存され、再起動後も有効となります。
+	<li>パスワードは共有メモリに記憶され、すべての秀丸を終了するまで有効となります。
+	<li><em class="imp">パスワードは平文で記憶・送信されます。他の (悪意ある) 秀丸マクロは共有メモリに記憶されているパスワードを読み取ることが可能です。</em>
+	<li>保存されているユーザー名を変更したい場合は、<em>パスワード入力</em>ダイアログで [キャンセル] を押してください。
+</UL>
+
+<!--{foottext--><!--}-->
+
+
+<H3><A name="statements" id="statements">お約束</A></H3>
+
+<H4>動作環境</H4>
+<UL class="sect">
+	<LI><A href="http://hide.maruo.co.jp/software/hidemaru.html">秀丸エディタ</A> v8.00 以降 + Internet Explorer 4 以降で動作するはずです。
+	<LI>秀丸エディタ v8.01β1 + Internet Explorer 8 で動作確認しました。
+	<LI>マクロ内部で Web サービスを利用しているため、インターネット接続がないと動作しません。
+</UL>
+
+<H4>ライセンス</H4>
+<UL class="sect">
+	<LI>このマクロはフリーウェアです。自由に利用、改変、再配布することができます。
+	<LI>作者はこのマクロに関する一切の責任を持ちません。
+	<LI>改変したものを公に再配布するときは次のことを明記してください。
+	<UL class="p">
+		<LI>改変したものである旨（できれば改変内容も）
+		<LI>改変元の名称、バージョン、一次配布場所
+	</UL>
+</UL>
+
+<H4>配布場所</H4>
+<P>一次配布場所は <A href="http://mobitan.org/hm/hidematter/">Wisteria - 秀丸マクロ - Hidematter</A> です。二次配布は次のところで行われています。</P>
+<UL>
+	<LI><A href="http://hide.maruo.co.jp/lib/macro/">秀丸エディタのマクロライブラリ</A>
+<!--
+	<LI><A href="http://www.vector.co.jp/vpack/filearea/win95/writing/edit/hm/">Vector - Windows95/98/Me &gt; 文書作成 &gt; テキストエディタ &gt; 秀丸エディタ</A>
+ -->
+</UL>
+
+<!--{foottext--><!--}-->
+
+
+<H3><A name="todo" id="todo">既知の問題</A></H3>
+
+<UL class="sect">
+	<LI>パスワードは ASCII 文字に限られる。
+	<LI>パスワードに「"」が含まれていると認証できないと思われる。
+	<LI>現在使っている Basic 認証は 2010 年 6 月いっぱい? で使えなくなる見込み。それまでに oAuth か xAuth へ移行する必要がある。
+</UL>
+
+<!--{foottext--><!--}-->
+
+
+<H3><A name="history" id="history">バージョン履歴</A></H3>
+
+<DL class="history">
+	<DT>Version 0.2 <SMALL>(2010/04/19)</SMALL><DD>
+	<UL>
+		<LI>長い文章を自動分割して連続投稿
+		<LI>URL 短縮機能を統合 (今のところ j.mp のみ対応)
+	</UL>
+	<DT>Version 0.1 <SMALL>(2010/04/18)</SMALL><DD>
+	<UL>
+		<LI>初版
+	</UL>
+</DL>
+
+<!--{foottext--><!--}-->
+
+
+<H3><A name="feedback" id="feedback">フィードバック</A></H3>
+
+<P>バグ報告、質問、ツッコミなどは <A href="http://forum.mobitan.org/hm/">談話室</A> へどうぞ。</P>
+
+
+<DIV class="footer" align="right">
+	<UL class="footnavi">
+		<LI>&lt; <A href="http://mobitan.org/hm/">秀丸マクロ</A>
+		<LI>&lt; <A href="http://mobitan.org/">Wisteria</A>
+	</UL>
+	<HR>
+	<ADDRESS>(C) mobitan 2010</ADDRESS>
+</DIV>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-12380484-1");
+pageTracker._setDomainName(".mobitan.org");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+</BODY>
+</HTML>

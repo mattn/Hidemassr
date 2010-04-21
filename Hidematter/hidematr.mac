@@ -1,0 +1,299 @@
+// 
+// 		Hidematter
+//  	Version 0.2  (2010/04/19)
+//  	Made by mobitan  http://mobitan.org/
+// 
+
+// [TODO]
+// Basic ”FØ‚Í 2010 ”N 6 ŒˆÈ~ƒTƒ|[ƒg‚³‚ê‚È‚­‚È‚éŒ©‚İBxAuth ‚Ö‚ÌˆÚs‚ª•K—vB
+
+$IniFile = currentmacrodirectory + "\\user=" + getenv("USERNAME") + ".ini";
+$LogFile = getenv("TEMP") + "\\" + currentmacrobasename + ".log";
+$Username_Bitly = "hidematter"; // bit.ly ‚Ìƒ†[ƒU[–¼
+$ApiKey_Bitly = "R_a36b5cdccc9b336ed06a0b848a99deae"; // bit.ly ‚Ì API Key
+#FontColor_OK = -1;
+#BackColor_OK = -1;
+#FontStyle_OK = 2;
+
+// #debug = 0;
+loaddll "HmJre.dll";
+call Main;
+freedll;
+endmacro;
+
+Main:
+	if (rectselecting) {
+		call Error "BOX ‘I‘ğ”ÍˆÍ‚Í“Še‚Å‚«‚Ü‚¹‚ñ";
+	}
+	##oc = column;  ##ol = lineno;
+	if (!selecting) {
+		call Select linelen2, lineno, 0, lineno;
+	}
+	call Shorten;
+	if (seltoplineno != selendlineno - (selendcolumn == 0)) {
+		question "1 s‚¸‚Â•ÊX‚É“Še‚µ‚Ü‚·‚©?";
+		##perline = result;
+	}
+	if (##perline) {
+		call TweetByLine;
+	} else {
+		call TweetGreedy;
+	}
+	escape;
+	moveto2 ##oc, ##ol;
+	return;
+
+Shorten:		// ‘I‘ğ”ÍˆÍ‚Ì URL ‚ğ’Zk
+	if (!selecting) {
+		return false;
+	}
+	if (strstr(gettext(seltopx, seltopy, selendx, selendy, true), "://") < 0) {
+		return false;
+	}
+	call WScript 6, "", "shortenUrls.js", $Username_Bitly, $ApiKey_Bitly;
+	return true;
+
+TweetByLine:		// 1 s‚¸‚Â˜A‘±“Še
+	// ##1 = Å‘å•¶š”
+	// $$2 = æ“ª•t‰Á•¶š—ñ
+	// $$3 = ––”ö•t‰Á•¶š—ñ
+	##ac = seltopcolumn;  ##al = seltoplineno;
+	##ec = selendcolumn;  ##el = selendlineno;
+	##cl = ##al;
+	while (##cl <= ##el) {
+		call Select 0, ##cl, 0, ##cl + 1, ##ac, ##al, ##ec, ##el;
+		call TweetGreedy;
+		##cl = ##cl + 1;
+	}
+	return true;
+
+TweetGreedy:		// Å‘å•¶š”‚ğ’´‚¦‚È‚¢‚æ‚¤•ªŠ„‚µ‚Ä˜A‘±“Še
+	##maxlen = 140;
+	$$p = "‘±t";
+	$$q = "s‘±";
+	if (!selecting) {
+		return false;
+	}
+	##ac = seltopcolumn;  ##al = seltoplineno;
+	##ec = selendcolumn;  ##el = selendlineno;
+	$$s = gettext2(##ac, ##al, ##ec, ##el, true);
+	if (wcslen($$s) > ##maxlen) {
+		question "“Še”ÍˆÍ‚Í " + str(wcslen($$s)) + " š‚ ‚è‚Ü‚·B\n" + str(##maxlen) + " š‚²‚Æ‚É•ªŠ„‚µ‚Ä˜A‘±“Še‚µ‚Ü‚·‚©?\n\n[‚Í‚¢]\t•ªŠ„‚µ‚Ä“Še‚·‚é\n[‚¢‚¢‚¦]\tƒLƒƒƒ“ƒZƒ‹";
+		if (!result) return false;
+	}
+	##bc = ##ac;  ##bl = ##al;
+	##first = true;
+	##last = false;
+	while (!##last) {
+		escape;
+		moveto2 ##bc, ##bl;
+		if (!##first) insert $$p;
+		if (##el == ##bl) ##ec = ##ec - ##bc + column;
+		##len = wcslen($$p) * (!##first);
+		while (code != eof) {
+			##cc = column;  ##cl = lineno;
+			wordrightsalnen;
+			while (result && colorcode & 0x1F == 0x0B) { // URL ‚Í•ªŠ„‚µ‚È‚¢
+				wordrightsalnen;
+			}
+			while (result && strstr("ABCDEHIJKRSTUX[jlnprtvxz!),.:;?]}¡£¤¥°Şß", char(code)) >= 0) { // s––‹Ö‘¥•¶š‚Í•ªŠ„‚µ‚È‚¢
+				right;
+			}
+			if (lineno > ##el || (lineno == ##el && column > ##ec)) {
+				moveto2 ##ec, ##el;
+			}
+			##len = ##len + wcslen(gettext2(##cc, ##cl, column, lineno, true));
+			if (lineno == ##el && column == ##ec) {
+				if (##len <= ##maxlen) {
+					##cc = column;  ##cl = lineno;
+					##last = true;
+				}
+				break;
+			}
+			if (##len + wcslen($$q) > ##maxlen) {
+				break;
+			}
+		}
+		moveto2 ##cc, ##cl;
+		if (!##last) insert $$q;
+		if (##el == ##cl) ##ec = ##ec - ##cc + column;
+		##dc = column;  ##dl = lineno;
+		call Select ##bc, ##bl, ##dc, ##dl, ##ac, ##al, ##ec, ##el;
+		call Tweet ##first, ##last;
+		##bc = ##dc;  ##bl = ##dl;
+		##first = false;
+	}
+	return true;
+
+Tweet:		// ‘I‘ğ”ÍˆÍ‚ğ“Še
+	// ##1 = Å‰ƒtƒ‰ƒO
+	// ##2 = ÅŒãƒtƒ‰ƒO
+	$$s = gettext(seltopx, seltopy, selendx, selendy, true);
+	call GSUBR $$s, "^\\s+|\\s+$", "", false;
+	if ($$return == "") {
+		return false;
+	}
+	if (wcslen($$s) > 140) {
+		call Confirm "140 š‚ğ’´‚¦‚Ä‚¢‚é‚æ‚¤‚Å‚·B‹­s‚µ‚Ü‚·‚©?";
+	}
+	call Authenticate "twitter.com";
+	call WScript 2, $LogFile, "wshTweet.js", $username, $password;
+	call Load $LogFile;
+	$$out = $$return;
+	if (val($$out) == 200) {
+		colormarker #FontColor_OK, #BackColor_OK, #FontStyle_OK, 1;
+	} else if (val($$out) == 401) {
+		call Unauthenticate "twitter.com";
+		call Error "Hidematter: ”FØƒGƒ‰[‚Å‚·\n" + $$out;
+	} else if (##2) {
+		call Error "Hidematter: “ŠeƒGƒ‰[‚Å‚·\n" + $$out;
+	} else {
+		call Confirm "Hidematter: “ŠeƒGƒ‰[‚Å‚·\n" + $$out + "\n‘±s‚µ‚Ü‚·‚©?";
+	}
+	if (!#debug) deletefile $LogFile;
+	return true;
+
+Authenticate:		// ƒ†[ƒU[–¼‚ÆƒpƒXƒ[ƒh‚ğæ“¾
+	// $$1 = ƒhƒƒCƒ“
+	while ($username == "" || $password == "") {
+		call _GetUsername $$1;
+		if ($username == "") call Error;
+		call _GetPassword $$1 + "/" + $username;
+		if ($password == "") call _ResetUsername $$1;
+	}
+	return;
+
+Unauthenticate:		// ƒ†[ƒU[–¼‚ÆƒpƒXƒ[ƒh‚ğ–³Œø‰»
+	// $$1 = ƒhƒƒCƒ“
+	call _ResetPassword $$1 + "/" + $username;
+	call _ResetUsername $$1;
+	return;
+
+_GetUsername:
+	// $$1 = ƒhƒƒCƒ“
+	$username = getinistr($IniFile, $$1, "username");
+	if ($username == "") {
+		$username = input("ƒ†[ƒU[–¼‚ğ“ü—Í‚µ‚Ä‚­‚¾‚³‚¢", "");
+		writeinistr $IniFile, $$1, "username", $username;
+	}
+	return;
+
+_GetPassword:
+	// $$1 = ƒhƒƒCƒ“
+	$$v = $IniFile + "/" + $$1 + "/password";
+	$password = getstaticvariable($$v, true);
+	if ($password == "") {
+		$password = input("ƒ†[ƒU[–¼: " + $username + "\n\nƒpƒXƒ[ƒh‚ğ“ü—Í‚µ‚Ä‚­‚¾‚³‚¢", "");
+		setstaticvariable $$v, $password, true;
+	}
+	return;
+
+_ResetUsername:
+	// $$1 = ƒhƒƒCƒ“
+	writeinistr $IniFile, $$1, "username", 0;
+	$username = "";
+	return;
+
+_ResetPassword:
+	// $$1 = ƒhƒƒCƒ“
+	$$v = $IniFile + "/" + $$1 + "/password";
+	$password = "";
+	setstaticvariable $$v, "", true;
+	return;
+
+Select:		// ”ÍˆÍ‘I‘ğ (––”ö‚Ì1‚ÂˆÈã‚Ì‰üs‚ğœ‚­)
+	// (##1, ##2)-(##3, ##4) = ‘I‘ğ”ÍˆÍ (column, lineno)
+	// (##5, ##6)-(##7, ##8) = ãŠE‰ºŠE (column, lineno)
+	if (##2 < ##4) {
+		##bc = ##1;  ##bl = ##2;  ##dc = ##3;  ##dl = ##4;
+	} else if (##4 < ##2) {
+		##bc = ##3;  ##bl = ##4;  ##dc = ##1;  ##dl = ##2;
+	} else if (##1 < ##3) {
+		##bc = ##1;  ##bl = ##2;  ##dc = ##3;  ##dl = ##4;
+	} else {
+		##bc = ##3;  ##bl = ##4;  ##dc = ##1;  ##dl = ##2;
+	}
+	if (##6 && (##bl < ##6 || (##bl == ##6 && ##bc < ##5))) {
+		##bc = ##5;  ##bl = ##6;
+		##lim = ##lim | 0x01; // ãŠE‚É’B‚µ‚½
+	}
+	if (##8 && (##dl > ##8 || (##dl == ##8 && ##dc > ##7))) {
+		##dc = ##7;  ##dl = ##8;
+		##lim = ##lim | 0x02; // ‰ºŠE‚É’B‚µ‚½
+	}
+	escape;
+	if (##dl > linecount2) {
+		gofileend;
+	} else {
+		moveto2 ##dc, ##dl;
+	}
+	while (lineno > ##bl && column == 0) {
+		up;  golineend2;
+	}
+	beginsel;
+	moveto2 ##bc, ##bl;
+	endsel;
+	return ##lim;
+
+WScript:		// ‘I‘ğ”ÍˆÍ‚Ì•¶š—ñ‚ğ•W€“ü—Í‚Æ‚µ‚ÄŠO•”ƒXƒNƒŠƒvƒg‚ğ‹N“®
+	// ##1 = o—Íæ (runex ‚Ì‘æ 5 ˆø”)
+	// $$2 = o—Íƒtƒ@ƒCƒ‹–¼ (runex ‚Ì‘æ 6 ˆø”)
+	// $$3 = ƒXƒNƒŠƒvƒgƒtƒ@ƒCƒ‹–¼
+	// $$4 = ƒXƒNƒŠƒvƒg‚Ì‘æ 1 ˆø”
+	// $$5 = ƒXƒNƒŠƒvƒg‚Ì‘æ 2 ˆø”
+	if ((!selecting) || (rectselecting) || (seltopx == selendx && seltopy == selendy)) {
+		return -1;
+	}
+	##cc = seltopcolumn;  ##cl = seltoplineno;
+	$$cmdline = "wscript.exe //U //nologo \"" + $$3 + "\" \"" + $$4 + "\" \"" + $$5 + "\"";
+	if (#debug == 3) call Confirm $$cmdline;
+	runex $$cmdline, 0, 5, "", ##1, $$2, 1, "", 2, currentmacrodirectory, 0, 1, 2;
+	if (##1 == 5 || ##1 == 6) {
+		beginsel;  moveto2 ##cc, ##cl;  endsel;
+	}
+	return getresultex(9);
+
+Load:		// •¶š—ñ‚ğƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚Ş
+	// $$1 = ƒtƒ@ƒCƒ‹–¼
+	##fso = createobject("Scripting.FileSystemObject");
+// 	##f = callmethod_returnobj(##fso, "OpenTextFile", $$1, 1, 0);	// ASCII
+	##f = callmethod_returnobj(##fso, "OpenTextFile", $$1, 1, 0, -1);	// Unicode
+	$$s = callmethod_returnstr(##f, "ReadAll");
+	callmethod ##f, "Close";
+	releaseobject ##fso;
+	return $$s;
+
+GSUBR:		// HmJre.dll ‚É‚æ‚é³‹K•\Œ»’uŠ·
+	// $$1 = ‘ÎÛ•¶š—ñ
+	// $$2 = ŒŸõƒpƒ^[ƒ“
+	// $$3 = ’uŠ·•¶š—ñiŒã•ûQÆ•s‰Âj
+	// ##4 = 1:‘å•¶š¬•¶š‚ğ‹æ•Ê‚·‚é
+	$$f = leftstr("FindRegularNoCaseSense", 11 + (##4 == 0) * 11);
+	$$s = $$1;
+	while (true) {
+		##p = dllfunc($$f, $$2, $$s, 0);
+		if (##p < 0) break;
+		$$r = $$r + leftstr($$s, ##p) + $$3;
+		$$s = midstr($$s, ##p + dllfunc("GetLastMatchLength"));
+	}
+	if (##p == -2) message "³‹K•\Œ»‚ÌƒGƒ‰[‚Å‚·\n" + $$2;
+	return $$r + $$s;
+
+Error:		// ƒGƒ‰[
+	if ($$1 != "") message currentmacrobasename + ": " + $$1;
+	freedll;
+	endmacro;
+
+Confirm:		// ƒfƒoƒbƒO—p
+	enabledraw;
+	question currentmacrobasename + ": " + $$1;
+	if (result) return;
+	freedll;
+	endmacro;
+
+/*
+‚`‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚a‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚b‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚c‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚d‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚e‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚f‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚g‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚h‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚i‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚j‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚k‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚l‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚m‚P‚Q‚R‚S‚T‚U‚V‚W‚X
+(140š)
+*/
+
+//  		(C) mobitan 2010

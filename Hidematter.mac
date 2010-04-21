@@ -1,0 +1,4 @@
+if (existfile(currentmacrodirectory + "\\Hidematter\\Hidematt.mac")) {
+	deletefile currentmacrodirectory + "\\Hidematter\\Hidematt.mac";
+}
+execmacro currentmacrodirectory + "\\Hidematter\\hidematr.mac";

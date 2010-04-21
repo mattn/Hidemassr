@@ -1,10 +1,11 @@
 // 
 //   	Hidematter
-//   	by mobitan  2010/04/17
+//   	by mattn
+//   	original by mobitan  2010/04/17
 // 
 
 // Usage: cscript.exe //U //nologo hidematt.js username password
-// •W€“ü—Í‚ğ Twitter ‚É“Še‚·‚é
+// •W€“ü—Í‚ğ Wassr ‚É“Še‚·‚é
 
 var args = WScript.Arguments;
 var username = args(0);
@@ -14,7 +15,7 @@ while (!WScript.StdIn.AtEndOfStream) {
 	buf += WScript.StdIn.ReadAll();
 }
 buf = buf.replace(/^\s+|\s+$/g, "");
-var res = http_post("http://twitter.com/statuses/update.json", username, password, "status=" + encodeURIComponent(buf));
+var res = http_post("http://api.wassr.jp/statuses/update.json", username, password, "status=" + encodeURIComponent(buf));
 var resjson = eval("(" + res.text + ")");
 WScript.StdErr.WriteLine(res.status + " " + resjson.error);
 WScript.Quit((res.status == 200) ? 0 : res.status);

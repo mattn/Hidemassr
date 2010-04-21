@@ -136,14 +136,14 @@ Tweet:		// 選択範囲を投稿
 	if (wcslen($$s) > 140) {
 		call Confirm "140 字を超えているようです。強行しますか?";
 	}
-	call Authenticate "twitter.com";
-	call WScript 2, $LogFile, "wshTweet.js", $username, $password;
+	call Authenticate "api.wassr.jp";
+	call WScript 2, $LogFile, "wshWassr.js", $username, $password;
 	call Load $LogFile;
 	$$out = $$return;
 	if (val($$out) == 200) {
 		colormarker #FontColor_OK, #BackColor_OK, #FontStyle_OK, 1;
 	} else if (val($$out) == 401) {
-		call Unauthenticate "twitter.com";
+		call Unauthenticate "api.wassr.jp";
 		call Error "Hidematter: 認証エラーです\n" + $$out;
 	} else if (##2) {
 		call Error "Hidematter: 投稿エラーです\n" + $$out;
